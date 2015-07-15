@@ -1,28 +1,40 @@
 (ns bencoder.core)
 
+(derive java.util.Map ::map)
+(derive java.util.Collection ::collection)
+(derive java.lang.Long ::integer)
+(derive java.lang.String ::string)
+
+
+
+(defmulti bencode class)
+		
+	(prefer-method bencode ::map ::collection)
+
+	(defmethod bencode ::number [s]
+		(str "i" s "e"))
+
+	(defmethod bencode ::string [s]
+		(str (count s) ":" s))
+
+	(defmethod bencode ::collection [s]
+		(str "l" (apply str (mapcat bencode s)) "e"))
+
+	(defmethod bencode ::map [s]
+		(str "d" 
+			(apply str (mapcat #(str (bencode (key %)) (bencode (val %))) (sort-by key s))) 
+			"e"))
+
+	(defmethod bencode :default [s]
+		(throw (Exception. "The bencode only works with integers, strings, lists and maps.")))
+
+
+
+
 (declare decoder)
 
-(defn bencode [s]
-  (cond (integer? s) (str "i" s "e")
-        (string? s) (str (count s) ":" s)
-        (sequential? s) (str "l" (apply str (mapcat bencode s)) "e")
-        :else (str "d" (apply str (mapcat #(str (bencode (key %))
-                                                (bencode (val %))) (sort-by key s))) "e")))
-
-(defn encoded-integer? [s]
-  (= \i (first s)))
-
-(defn encoded-string? [s]
-  (integer? (read-string (subs s 0 1))))
-
-(defn encoded-list? [s]
-  (= \l (first s)))
-
-(defn encoded-map? [s]
-  (= \d (first s)))
-
 (defn find-integer [s]
-  (Integer. (re-find #"\d+" s)))
+  (Long. (re-find #"\d+" s)))
 
 (defn decode-integer [s]
   (let [abs (find-integer s)]
@@ -46,10 +58,23 @@
 (defn decode-map [s]
 	(apply hash-map (decode-list s)))
 
-(defn decoder [s]
-  (let [c (count s)]
-    (cond (encoded-integer? s) (decode-integer s)
-          (encoded-string? s) (decode-string s)
-          (encoded-list? s) (decode-list s)
-          (encoded-map? s) (decode-map s)
-          :else "Error. The bencode only works with integers, strings, lists and maps." )))
+(defmulti decoder (fn [s] 
+	(let [s1 (str (first s))]
+		(if (< 0 (count (re-find #"\d+" s1)))
+		"1"
+		s1))))
+
+	(defmethod decoder "i" [s]
+		(decode-integer s))
+
+	(defmethod decoder "1" [s]
+		(decode-string s))
+
+	(defmethod decoder "l" [s]
+		(decode-list s))
+
+	(defmethod decoder "d" [s]
+		(decode-map s))
+
+	(defmethod decoder :default [s]
+		(throw (Exception. "The input is not encoded according to the bencoder requirements")))

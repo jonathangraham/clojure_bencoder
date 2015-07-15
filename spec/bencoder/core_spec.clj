@@ -36,7 +36,13 @@
     (should= {"foo" [1 2 3 "hello"] "a" 1} (decoder "d1:ai1e3:fooli1ei2ei3e5:helloee")))
 
   (it "decodes another nested map"
-    (should= {"foo" {"a" 3, "b" 4}, "a" 7} (decoder "d1:ai7e3:food1:ai3e1:bi4eee"))))
+    (should= {"foo" {"a" 3, "b" 4}, "a" 7} (decoder "d1:ai7e3:food1:ai3e1:bi4eee")))
+
+  (it "gives error if input is not properly encoded"
+    (should-throw (decoder "zfgjk")))
+
+  (it "gives error if input is not properly encoded within a nested map"
+    (should-throw (decoder "d1:ai7e2:food1:ai3e1:bi4eee"))))
 
 
 (describe "Bencode"
@@ -63,4 +69,7 @@
     (should= "d1:ai1e3:fooli1ei2ei3e5:helloee" (bencode {"foo" [1 2 3 "hello"] "a" 1})))
 
   (it "encoces a maps within maps"
-    (should= "d1:ai7e3:food1:ai3e1:bi4eee" (bencode {"foo" {"a" 3, "b" 4}, "a" 7}))))
+    (should= "d1:ai7e3:food1:ai3e1:bi4eee" (bencode {"foo" {"a" 3, "b" 4}, "a" 7})))
+
+  (it "doesn't encode a float"
+    (should-throw (bencode 1.0))))
