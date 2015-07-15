@@ -1,5 +1,5 @@
 (ns bencoder.decoder
-	(:require [bencoder.core :refer :all]))
+	(:require [bencoder.encoder :refer :all]))
 
 (declare decoder)
 

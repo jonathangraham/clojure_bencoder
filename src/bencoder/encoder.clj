@@ -1,4 +1,4 @@
-(ns bencoder.core)
+(ns bencoder.encoder)
 
 (derive java.util.Map ::map)
 (derive java.util.Collection ::collection)

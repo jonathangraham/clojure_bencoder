@@ -1,6 +1,6 @@
-(ns bencoder.core-spec
+(ns bencoder.encoder-spec
   (:require [speclj.core :refer :all]
-            [bencoder.core :refer :all]))
+            [bencoder.encoder :refer :all]))
 
 (describe "Bencode"
 
