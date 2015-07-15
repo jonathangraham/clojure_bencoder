@@ -30,7 +30,13 @@
     (should= [["foo" "bar"] "spam" 42] (decoder "ll3:foo3:bare4:spami42ee")))
 
   (it "decodes a map with one pair"
-  	(should= {"foo" 42} (decoder "d3:fooi42ee"))))
+  	(should= {"foo" 42} (decoder "d3:fooi42ee")))
+
+  (it "decodes a nested map"
+    (should= {"foo" [1 2 3 "hello"] "a" 1} (decoder "d1:ai1e3:fooli1ei2ei3e5:helloee")))
+
+  (it "decodes another nested map"
+    (should= {"foo" {"a" 3, "b" 4}, "a" 7} (decoder "d1:ai7e3:food1:ai3e1:bi4eee"))))
 
 
 (describe "Bencode"
