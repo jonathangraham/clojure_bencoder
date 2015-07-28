@@ -9,7 +9,7 @@
 (defn decode-integer [s]
   (let [abs (find-integer s)]
   	(if (= \- (second s))
-  		(* -1 abs)
+  		(- abs)
   		abs)))
 
 (defn decode-string [s]
